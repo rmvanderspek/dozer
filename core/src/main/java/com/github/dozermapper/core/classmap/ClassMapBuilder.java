@@ -24,6 +24,8 @@ import java.util.List;
 import java.util.Map.Entry;
 import java.util.Set;
 
+import com.github.dozermapper.core.Converter;
+import com.github.dozermapper.core.CustomConverter;
 import com.github.dozermapper.core.Mapping;
 import com.github.dozermapper.core.OptionValue;
 import com.github.dozermapper.core.classmap.generator.BeanMappingGenerator;
@@ -400,6 +402,7 @@ public final class ClassMapBuilder {
         public boolean apply(ClassMap classMap, Configuration configuration) {
             Class<?> srcType = classMap.getSrcClassToMap();
 
+
             PropertyDescriptor[] srcProperties = ReflectionUtils.getPropertyDescriptors(srcType);
             for (PropertyDescriptor property : srcProperties) {
                 Method readMethod = property.getReadMethod();
@@ -415,6 +418,8 @@ public final class ClassMapBuilder {
                         }
                     }
                 }
+
+                this.configureConverter(property, classMap);
             }
 
             Class<?> destType = classMap.getDestClassToMap();
@@ -436,6 +441,19 @@ public final class ClassMapBuilder {
             }
 
             return false;
+        }
+
+        private void configureConverter(PropertyDescriptor property, ClassMap classMap) {
+            Method readMethod = property.getReadMethod();
+            Converter converter = readMethod.getAnnotation(Converter.class);
+            if (converter != null) {
+                String propertyName = property.getName();
+                Class<? extends CustomConverter> customConverter = converter.value();
+                if (customConverter != null) {
+                    FieldMap fieldMap = classMap.getFieldMapUsingSrc(propertyName);
+                    fieldMap.setCustomConverter(customConverter.getCanonicalName());
+                }
+            }
         }
     }
 
