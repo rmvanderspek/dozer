@@ -25,10 +25,21 @@ or isolating the mapping code with certain duplication of entity names.
 Overannotated beans could be problematic to read and understand.
 
 === Usage
-*WARNING:* Annotation support in Dozer is experimental and does not
+WARNING: Annotation support in Dozer is experimental and does not
 cover complex use cases yet. However it may be useful to implement that
 simplest mappings you have had to do in Xml or API before.
 
+==== Currently Dozer offers only two annotation:
+* xref:anchor-mapping[@Mapping]
+* @Converter
+
+The next ones will be
+added in following releases. As for now you can mix and match all
+flavours of mapping types to achieve the desired effect: Xml, API and
+Annotations.
+
+[[anchor-mapping]]
+==== @Mapping
 The idea is very simple. You put @Mapping annotation either on getter of
 field directly. If Dozer finds that it adds a bi-directional mapping. It
 means that putting annotation once will create mappings for both
@@ -86,7 +97,32 @@ mapped. Property "name" will be mapped by naming convention. Property
 "binaryData". Do not worry about _private_ modifier; it will be handled
 automatically.
 
-Currently Dozer offers only one annotation, but the next ones will be
-added in following releases. As for now you can mix and match all
-flavours of mapping types to achieve the desired effect: Xml, API and
-Annotations.
+[[anchor-converter]]
+==== @Converter
+
+In some cases a (custom) converter is needed to translate the data from
+the source field to the target field. This can now also be achieved by
+adding the @Converter annotation. The following example demonstrates the
+@Converter annotation.
+
+[source,java,prettyprint]
+----
+public class SourceBean {
+
+    @Converter(CustomMediaTypeConverter.class)
+    private String mediaType;
+
+}
+----
+
+[source,java,prettyprint]
+----
+public class TargetBean {
+
+    private MediaType mediaType;
+}
+----
+
+You're own CustomMediaTypeConverter.class will now transform the String
+representation of mediaType to the MediaType enum.
+link:customconverter.adoc[Read more about the custom converter.]]
